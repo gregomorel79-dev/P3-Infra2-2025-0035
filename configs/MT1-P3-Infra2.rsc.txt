@@ -1,0 +1,49 @@
+
+[admin@MT1] > /export
+# oct/10/2026 18:12:32 by RouterOS 6.49.17
+# software id =
+#
+#
+#
+/interface ethernet
+set [ find default-name=ether1 ] disable-running-check=no
+set [ find default-name=ether2 ] disable-running-check=no
+set [ find default-name=ether3 ] disable-running-check=no
+set [ find default-name=ether4 ] disable-running-check=no
+set [ find default-name=ether5 ] disable-running-check=no
+set [ find default-name=ether6 ] disable-running-check=no
+set [ find default-name=ether7 ] disable-running-check=no
+set [ find default-name=ether8 ] disable-running-check=no
+/interface vlan
+add interface=ether2 name=vlan10 vlan-id=10
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip ipsec profile
+add dh-group=modp2048 enc-algorithm=des name=prof-fg2
+/ip ipsec peer
+add address=20.25.35.1/32 name=peer-fg2 profile=prof-fg2
+/ip ipsec proposal
+add enc-algorithms=des name=prop-fg2 pfs-group=modp2048
+/ip pool
+add name=pool-vlan10 ranges=10.20.25.2-10.20.25.126
+/ip dhcp-server
+add address-pool=pool-vlan10 disabled=no interface=vlan10 name=dhcp-vlan10
+/ip address
+add address=20.25.35.2/24 interface=ether1 network=20.25.35.0
+add address=10.20.25.1/25 interface=vlan10 network=10.20.25.0
+/ip dhcp-client
+add interface=ether1
+/ip dhcp-server lease
+add address=10.20.25.10 comment=PC-PRIV mac-address=02:42:A7:23:FB:00 server=dhcp-vlan10
+add address=10.20.25.20 comment=PC-NOPRIV mac-address=02:42:6D:FF:7C:00 server=dhcp-vlan10
+/ip dhcp-server network
+add address=10.20.25.0/25 gateway=10.20.25.1
+/ip ipsec identity
+add peer=peer-fg2 secret=Lab2025-0035
+/ip ipsec policy
+add dst-address=10.20.35.8/29 peer=peer-fg2 proposal=prop-fg2 src-address=10.20.25.0/25 tunnel=yes
+/ip route
+add distance=1 dst-address=10.20.35.8/29 gateway=20.25.35.1
+/system identity
+set name=MT1
+[admin@MT1] >
